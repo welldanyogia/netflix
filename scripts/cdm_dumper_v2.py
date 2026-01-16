@@ -97,7 +97,8 @@ class CDMDumper:
 def list_processes(name_filter):
     """List processes matching filter"""
     processes = []
-    for proc in frida.enumerate_processes():
+    device = frida.get_local_device()
+    for proc in device.enumerate_processes():
         if name_filter.lower() in proc.name.lower():
             processes.append(proc)
     return processes
