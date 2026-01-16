@@ -402,6 +402,80 @@ Netflix uses custom TrustManager implementations:
 
 ---
 
+## License Response Structure (Captured)
+
+### Protobuf Format
+
+Netflix license response menggunakan custom protobuf wrapper:
+
+```
+Field 1 (varint): 2                    # Message type
+Field 2 (nested): License Container
+  ├── Field 1: Session Info
+  │   ├── Field 1: Session ID (16 bytes)
+  │   └── Field 2: JSON Metadata
+  │       {
+  │         "version": "1.0",
+  │         "esn": "NFCDIE-03-...",
+  │         "issuetime": 1768550603,
+  │         "movieid": "81697775",
+  │         "salt": "283781366..."
+  │       }
+  ├── Field 2: License Config
+  │   ├── Field 4: License Duration (900 sec)
+  │   └── Field 5: Renewal Window (43200 sec)
+  ├── Field 3: Key Container (repeated)
+  │   ├── Field 1: KID (16 bytes)
+  │   ├── Field 2: Encrypted Key (16 bytes)
+  │   └── Field 3: IV (16 bytes)
+  └── Field 6: Token Info
+      {
+        "tokenId": "735380826...",
+        "sequenceNumber": 4
+      }
+Field 3: Signature (32 bytes)
+Field 4: Encrypted Data (128 bytes)
+Field 7: CDM Version ("19.15.0")
+```
+
+### Extracted Key Data
+
+```
+Key 1:
+  KID: 9645486ccbd05cdbaaddfe47275203ac
+  Key: cfbc04c16994ffae97c6afc699fb2457... (encrypted)
+
+Key 2:
+  KID: 00000000092ea8970000000000000000
+  Key: c795ccc81e00e4f0d3546ec5447ffbb5 (encrypted)
+  IV:  4ca7b1244ef15dfbb285ce7d0ab3991b
+
+Key 3:
+  KID: 00000000092ea8940000000000000000
+  Key: c82f76c14dd2f0b24ca39eed1e861689 (encrypted)
+  IV:  b2b7fcaf1af73b771d66dd29017c89a2
+```
+
+### Key Decryption Requirements
+
+Keys masih **encrypted** dengan session key. Untuk decrypt:
+
+1. **CDM Device Files** - `client_id_blob` + `private_key`
+2. **Session Key** - Derived dari license challenge + CDM private key
+3. **AES-CBC Decrypt** - Menggunakan session key dan IV
+
+### ESN Format (Browser)
+
+```
+NFCDIE-03-L22QT2MHJFN5XKEKR080EP6FL0UQ67
+
+NFCDIE = Netflix Chrome Desktop IE (Edge)
+03 = Version/Type
+L22QT2MHJFN5XKEKR080EP6FL0UQ67 = Unique device identifier
+```
+
+---
+
 ## ESN (Electronic Serial Number) Generation
 
 ### Overview
