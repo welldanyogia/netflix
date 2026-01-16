@@ -1,0 +1,7 @@
+# Ignore decompiled sources (too large)
+decompiled/
+patched/
+
+# OS files
+.DS_Store
+Thumbs.db
